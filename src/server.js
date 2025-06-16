@@ -8,16 +8,28 @@ import socketHandler from "./config/socket.js";
 
 dotenv.config();
 
+const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:5500'];
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: allowedOrigins,
     credentials: true
   }
 });
 
-app.use(cors());
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
+
 app.use(express.json());
 app.use("/", routes);
 

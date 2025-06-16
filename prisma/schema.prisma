@@ -19,4 +19,23 @@ model User {
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
+
+  sentMessages     Message[] @relation("UserSentMessages")
+  receivedMessages Message[] @relation("MessageReceiver")
+}
+
+model Message {
+  id          String    @id @default(cuid())
+  content     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  senderId    String
+  receiverId  String
+
+  sender      User      @relation("UserSentMessages", fields: [senderId], references: [id])
+  receiver    User      @relation("MessageReceiver", fields: [receiverId], references: [id])
+
+  seen        Boolean   @default(false)       // Whether the receiver has seen the message
+  delivered   Boolean   @default(false)       // Can be set true when socket.io confirms delivery
 }
